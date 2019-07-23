@@ -17,5 +17,8 @@ export class DockerController {
    getInstanceStatus(name?:String,id?:String){
        return this.dockerService.isInstanceRunning(name,id);
    }
-    
+    @Get('all')
+    getAllInstances():any{
+        return this.dockerService.getAllInstances();
+    }
 }
