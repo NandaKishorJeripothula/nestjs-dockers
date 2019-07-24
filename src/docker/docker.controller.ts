@@ -22,13 +22,13 @@ export class DockerController {
     }
     @Get('running')
     getAllRunningInstances(): any {
-        return this.dockerService.getRunningInstances();
+        return this.dockerService.getRunningInstances().then(data=>data.length?this.getRequiredData(data):data);
     }
 
     @Get('all')
     getAllInstances(): any {   
         return this.dockerService.getAllRunningInstances().then(
-            data=>data.length?this.getRequiredData(data):''
+            data=>data.length?this.getRequiredData(data):data
         )
         // return this.getRequiredData(rawData);
         
