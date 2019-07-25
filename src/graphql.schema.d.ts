@@ -37,7 +37,7 @@ export class Container {
     State?: string;
     Status?: string;
     Ports?: Port[];
-    Labels?: string;
+    Labels?: Labels;
     SizeRw?: number;
     SizeRootFs?: number;
     HostConfig?: HostConfig;
@@ -47,6 +47,10 @@ export class Container {
 
 export class HostConfig {
     NetworkMode?: string;
+}
+
+export class Labels {
+    _any?: string;
 }
 
 export class Mount {
@@ -60,7 +64,7 @@ export class Mount {
 }
 
 export abstract class IMutation {
-    abstract createNewContainer(data?: CreateNewContainer): string | Promise<string>;
+    abstract createNewContainer(data?: CreateNewContainer): NewContainer | Promise<NewContainer>;
     abstract stopRunningContainer(data: ContainerId): string | Promise<string>;
     abstract startContainer(data: ContainerId): string | Promise<string>;
     abstract removeContainer(data: ContainerId): string | Promise<string>;
@@ -72,6 +76,11 @@ export class Networks {
 
 export class NetworkSettings {
     Networks?: Networks;
+}
+
+export class NewContainer {
+    Id: string;
+    Warnings?: string[];
 }
 
 export class Port {

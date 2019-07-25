@@ -32,6 +32,9 @@ type Networks{
 type NetworkSettings{
     Networks:Networks
 }
+type Labels{
+  _any: String
+}
 type Container
 {
   Id: String!,
@@ -43,7 +46,7 @@ type Container
   State: String,
   Status: String,
   Ports: [Port],
-  Labels: String,
+  Labels: Labels,
   SizeRw: Int,
   SizeRootFs: Int,
   HostConfig: HostConfig,
@@ -55,16 +58,20 @@ input CreateNewContainer{
   image: String!,
   commands: [String]
 }
+type NewContainer{
+  Id: String!,
+  Warnings: [String]
+}
 input ContainerId{
   id: String!
 }
 type Mutation{
-  createNewContainer(data: CreateNewContainer): String
+  createNewContainer(data: CreateNewContainer): NewContainer
   stopRunningContainer(data: ContainerId!): String
   startContainer(data: ContainerId!): String
   removeContainer(data: ContainerId!): String
 }
 type Query{
   allContainers: [Container]!
-  allRunningContainers: [Container]!
+  allRunningContainers: [Container]
 }

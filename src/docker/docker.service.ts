@@ -36,7 +36,7 @@ export class DockerService {
             .then(res => res.status == 200 ? res.data : Error("Unable to Get Logs"))
             .catch(error => Error(error));
     }
-    async createNewContainer(requestedName: String, image: String, commands: String[]): Promise<String> {
+    async createNewContainerAPIS(requestedName: String, image: String, commands: String[]): Promise<String> {
         return await this.httpService.post(
             `${url}/containers/create/?name=${requestedName}`,
             {
@@ -66,8 +66,35 @@ export class DockerService {
     async getAllContainers(@Args() args, @Info() info): Promise<any> {
         return await this.httpService.get(`${url}/containers/json?all=true`)
             .toPromise()
-            .then(res => res.status === 200 ? res.data : res.data.message)
+            .then(
+                res => res.status === 200 && res.data.length == 0 ? { "Message": 'No Running Containers' }
+                    : res.status === 200 && res.data.length > 0 ? res.data : res.data.message)
             .then(data => data)
             .catch(error => Error(error));
     }
+
+    async allRunningContainers(@Args() args, @Info() info): Promise<any> {
+        return await this.httpService.get(`${url}/containers/json`)
+            .toPromise()
+            .then(
+                res => res.status === 200 && res.data.length == 0 ? []
+                    : res.status === 200 && res.data.length > 0 ? res.data : res.data.message)
+            .then(data => data)
+            .catch(error => Error(error));
+    }
+    async createNewContainer(@Args() args, @Info() info): Promise<any> {
+        return await this.httpService.post(
+            `${url}/containers/create?name=${args.data.requestedName}`,
+            {
+                Image: args.data.image,
+                Cmd: args.commands ? args.commands : []
+            }
+        )
+            .toPromise()
+            .then(res => {
+                return res.status === 201 ? res.data : res.data.message
+            })
+            .catch(error => Error(error));
+    }
+
 }
