@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Param } from '@nestjs/common';
 import { DockerService } from './docker.service';
 
 @Controller('docker')
@@ -24,14 +24,15 @@ export class DockerController {
     getAllRunningInstances(): any {
         return this.dockerService.getRunningInstances().then(data=>data.length?this.getRequiredData(data):data);
     }
-
     @Get('all')
     getAllInstances(): any {   
-        return this.dockerService.getAllRunningInstances().then(
-            data=>data.length?this.getRequiredData(data):data
-        )
-        // return this.getRequiredData(rawData);
-        
+        return this.dockerService.getAllRunningInstances().then(data=>data.length?this.getRequiredData(data):data)
+    }
+
+    @Post('logs')    
+    getInstanceLogs(@Param('id') id:String):any{
+        console.log("id:" ,id)
+        return this.dockerService.getInstanceLogs(id);
     }
 
     getRequiredData(data):any{
@@ -39,7 +40,6 @@ export class DockerController {
         data.forEach(({ Id, Names, Image, State, Status }) => {
             a.push ({ Id, Names:Names[0], Image, State, Status })
         })
-        console.log(a);
         return a;
     }
 }
