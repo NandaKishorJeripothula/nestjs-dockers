@@ -71,7 +71,7 @@ type Message{
 type Mutation{
   createNewContainer(data: CreateNewContainer!): NewContainer
   startContainer(data: ContainerId!): Message
-  stopRunningContainer(data: ContainerId!): Message
+  stopContainer(data: ContainerId!): Message
   restartContainer(data:ContainerId!):Message
   killContainer(data:ContainerId!):Message
   removeContainer(data: ContainerId!): Message

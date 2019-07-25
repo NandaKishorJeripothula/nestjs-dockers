@@ -25,9 +25,9 @@ export class ContainerResolver {
     async startContainer(@Args() args, @Info() info){
         return await this.dockerService.startContainer(args,info);
     }
-    @Mutation('stopRunningContainer')
-    async stopRunningContainer(@Args() args, @Info() info){
-        return await this.dockerService.stopRunningContainer(args,info);
+    @Mutation('stopContainer')
+    async stopContainer(@Args() args, @Info() info){
+        return await this.dockerService.stopContainer(args,info);
     }
     @Mutation('restartContainer')
     async restartContainer(@Args() args, @Info() info){

@@ -2,7 +2,9 @@ import { Injectable, HttpService } from '@nestjs/common';
 
 import { Query, Resolver, Args, Info } from '@nestjs/graphql';
 
-const url = "http://localhost:2375";
+const address= "http://localhost:2375";
+const ver=""; // currently its v1.40 May be this is needed in production level
+const url=address+ver;
 @Injectable()
 export class DockerService {
     constructor(private readonly httpService: HttpService) { }
@@ -103,7 +105,7 @@ export class DockerService {
             .catch(error => error.response.status === 304 ? { message: "Container Already Started" }
                 : error.response.status === 404 ? { message: "No Such Container" } : Error(error));
     }
-    async stopRunningContainer(@Args() args, @Info() info): Promise<any> {
+    async stopContainer(@Args() args, @Info() info): Promise<any> {
         return await this.httpService.post(`${url}/containers/${args.data.Id}/stop`)
             .toPromise()
             .then(res => res.status === 204 ? { message: "Container stopped Successfully" } : res.data)
@@ -137,7 +139,6 @@ export class DockerService {
         for (let [key, value] of Object.entries(args.data.LogOptions)) {
             queryParams+=(`?${key}=${value}`)
         }
-        // console.log(queryParams);
         return await this.httpService.get(`${url}/containers/${args.data.Container.Id}/logs${queryParams}`)
             .toPromise()
             .then(res => res.status === 101 ? { message: "Logs Being Returned as Stream" }

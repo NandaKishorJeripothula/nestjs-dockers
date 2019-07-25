@@ -84,7 +84,7 @@ export class Mount {
 export abstract class IMutation {
     abstract createNewContainer(data: CreateNewContainer): NewContainer | Promise<NewContainer>;
     abstract startContainer(data: ContainerId): Message | Promise<Message>;
-    abstract stopRunningContainer(data: ContainerId): Message | Promise<Message>;
+    abstract stopContainer(data: ContainerId): Message | Promise<Message>;
     abstract restartContainer(data: ContainerId): Message | Promise<Message>;
     abstract killContainer(data: ContainerId): Message | Promise<Message>;
     abstract removeContainer(data: ContainerId): Message | Promise<Message>;
