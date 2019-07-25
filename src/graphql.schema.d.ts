@@ -6,13 +6,27 @@
 
 /* tslint:disable */
 export class ContainerId {
-    id: string;
+    Id: string;
 }
 
 export class CreateNewContainer {
     requestedName: string;
     image: string;
     commands?: string[];
+}
+
+export class LogOptions {
+    stdout?: boolean;
+    stderr?: boolean;
+    since?: number;
+    until?: number;
+    timestamps?: number;
+    tail?: number;
+}
+
+export class Logs {
+    Container: ContainerId;
+    LogOptions: LogOptions;
 }
 
 export class Bridge {
@@ -53,6 +67,10 @@ export class Labels {
     _any?: string;
 }
 
+export class Message {
+    message?: string;
+}
+
 export class Mount {
     Name?: string;
     Sourc?: string;
@@ -64,10 +82,12 @@ export class Mount {
 }
 
 export abstract class IMutation {
-    abstract createNewContainer(data?: CreateNewContainer): NewContainer | Promise<NewContainer>;
-    abstract stopRunningContainer(data: ContainerId): string | Promise<string>;
-    abstract startContainer(data: ContainerId): string | Promise<string>;
-    abstract removeContainer(data: ContainerId): string | Promise<string>;
+    abstract createNewContainer(data: CreateNewContainer): NewContainer | Promise<NewContainer>;
+    abstract startContainer(data: ContainerId): Message | Promise<Message>;
+    abstract stopRunningContainer(data: ContainerId): Message | Promise<Message>;
+    abstract restartContainer(data: ContainerId): Message | Promise<Message>;
+    abstract killContainer(data: ContainerId): Message | Promise<Message>;
+    abstract removeContainer(data: ContainerId): Message | Promise<Message>;
 }
 
 export class Networks {
@@ -92,4 +112,5 @@ export class Port {
 export abstract class IQuery {
     abstract allContainers(): Container[] | Promise<Container[]>;
     abstract allRunningContainers(): Container[] | Promise<Container[]>;
+    abstract getContainerLogs(data: Logs): Message | Promise<Message>;
 }

@@ -55,7 +55,7 @@ export class DockerService {
             .catch(error => Error(error));
     }
     async stopRunningInstance(id: String) {
-        return await this.httpService.post(`${url}/containers/${id}/start`)
+        return await this.httpService.post(`${url}/containers/${id}/stop`)
             .toPromise()
             .then(res => res.status === 204 ? 'Container Stoppeds Successfully' : res.data.message)
             .catch(error => Error(error));
@@ -96,5 +96,55 @@ export class DockerService {
             })
             .catch(error => Error(error));
     }
+    async startContainer(@Args() args, @Info() info): Promise<any> {
+        return await this.httpService.post(`${url}/containers/${args.data.Id}/start`)
+            .toPromise()
+            .then(res => res.status === 204 ? { message: "Container Started Successfully" } : res.data)
+            .catch(error => error.response.status === 304 ? { message: "Container Already Started" }
+                : error.response.status === 404 ? { message: "No Such Container" } : Error(error));
+    }
+    async stopRunningContainer(@Args() args, @Info() info): Promise<any> {
+        return await this.httpService.post(`${url}/containers/${args.data.Id}/stop`)
+            .toPromise()
+            .then(res => res.status === 204 ? { message: "Container stopped Successfully" } : res.data)
+            .catch(error => error.response.status === 304 ? { message: "Container Already Stopped" }
+                : error.response.status === 404 ? { message: "No Such Container" } : Error(error));
+    }
+    async restartContainer(@Args() args, @Info() info): Promise<any> {
+        return await this.httpService.post(`${url}/containers/${args.data.Id}/restart`)
+            .toPromise()
+            .then(res => res.status === 204 ? { message: "Container Restarted Successfully" } : res.data)
+            .catch(error => error.response.status === 404 ? { message: "No Such Container" } : Error(error));
+    }
+    async killContainer(@Args() args, @Info() info): Promise<any> {
+        return await this.httpService.post(`${url}/containers/${args.data.Id}/kill`)
+            .toPromise()
+            .then(res => res.status === 204 ? { message: "Container Killed" } : res.data)
+            .catch(error => error.response.status === 404 ? { message: "No Such Container" }
+                : error.response.status === 409 ? { message: "container is not running" } : Error(error));
+    }
+    async removeContainer(@Args() args, @Info() info): Promise<any> {
+        return await this.httpService.delete(`${url}/containers/${args.data.Id}`)
+            .toPromise()
+            .then(res => res.status === 204 ? { message: "Container Removed" } : res.data)
+            .catch(error => error.response.status === 400 ? { message: "Bad Parameter" }
+                : error.response.status === 404 ? { message: "No Such Container" }
+                    : error.response.status === 409 ? { message: "Conflict Raised While Removing\n "+error.response.data.message }
+                        : Error(error));
+    }
+    async getContainerLogs(@Args() args, @Info() info): Promise<any> {
+        let queryParams='';
+        for (let [key, value] of Object.entries(args.data.LogOptions)) {
+            queryParams+=(`?${key}=${value}`)
+        }
+        // console.log(queryParams);
+        return await this.httpService.get(`${url}/containers/${args.data.Container.Id}/logs${queryParams}`)
+            .toPromise()
+            .then(res => res.status === 101 ? { message: "Logs Being Returned as Stream" }
+                : res.status === 200 ? { message: `Logs\n:${res.data}` } : res.data)
+            .catch(error => error.response.status === 404 ? { message: "No Such Container" } : Error(error));
+    }
+
+
 
 }

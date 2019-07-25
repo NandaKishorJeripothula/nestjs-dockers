@@ -63,15 +63,42 @@ type NewContainer{
   Warnings: [String]
 }
 input ContainerId{
-  id: String!
+  Id: String!
+}
+type Message{
+  message:String
 }
 type Mutation{
-  createNewContainer(data: CreateNewContainer): NewContainer
-  stopRunningContainer(data: ContainerId!): String
-  startContainer(data: ContainerId!): String
-  removeContainer(data: ContainerId!): String
+  createNewContainer(data: CreateNewContainer!): NewContainer
+  startContainer(data: ContainerId!): Message
+  stopRunningContainer(data: ContainerId!): Message
+  restartContainer(data:ContainerId!):Message
+  killContainer(data:ContainerId!):Message
+  removeContainer(data: ContainerId!): Message
+  
 }
+input Logs{
+  Container:ContainerId!
+  LogOptions:LogOptions!
+}
+""" LogOptions must have *** atleast one param among *stdout* and *stderr* be passed***"""
+input LogOptions{
+  "Return logs from stdout"
+  stdout:Boolean
+  "Return logs from stderr"
+  stderr:Boolean
+  "Only return logs since this time, as a UNIX timestamp"
+  since:Int
+  "Only return logs before this time, as a UNIX timestamp"
+  until:Int
+  "Add timestamps to every log line"
+  timestamps:Int
+  "Only return this Int of log lines from the end of the logs. Specify as an integer or all to output all log lines."
+  tail:Int
+}
+
 type Query{
   allContainers: [Container]!
-  allRunningContainers: [Container]
+  allRunningContainers: [Container] 
+  getContainerLogs(data:Logs!):Message
 }
