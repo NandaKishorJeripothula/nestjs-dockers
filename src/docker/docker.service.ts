@@ -1,5 +1,7 @@
 import { Injectable, HttpService } from '@nestjs/common';
-import { identifier, thisExpression } from '@babel/types';
+
+import { Query, Resolver, Args, Info } from '@nestjs/graphql';
+
 const url = "http://localhost:2375";
 @Injectable()
 export class DockerService {
@@ -56,6 +58,16 @@ export class DockerService {
         return await this.httpService.post(`${url}/containers/${id}/start`)
             .toPromise()
             .then(res => res.status === 204 ? 'Container Stoppeds Successfully' : res.data.message)
+            .catch(error => Error(error));
+    }
+
+
+    /** Graphql Services */
+    async getAllContainers(@Args() args, @Info() info): Promise<any> {
+        return await this.httpService.get(`${url}/containers/json?all=true`)
+            .toPromise()
+            .then(res => res.status === 200 ? res.data : res.data.message)
+            .then(data => data)
             .catch(error => Error(error));
     }
 }

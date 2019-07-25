@@ -1,0 +1,70 @@
+type Port{
+  PrivatePort: Int,
+  PublicPort: Int,
+  Type: String
+}
+type HostConfig{
+  NetworkMode: String
+}
+type Mount{
+  Name: String,
+  Sourc: String,
+  Destination: String,
+  Driver: String,
+  Mode: String,
+  RW: Boolean,
+  Propagation: String
+}
+type Bridge{
+  NetworkID: String,
+  EndpointID: String,
+  Gateway: String,
+  IPAddress: String,
+  IPPrefixLen: Int,
+  IPv6Gateway: String,
+  GlobalIPv6Address: String,
+  GlobalIPv6PrefixLen: Int,
+  MacAddress: String
+}
+type Networks{
+      bridge: Bridge
+}
+type NetworkSettings{
+    Networks:Networks
+}
+type Container
+{
+  Id: String!,
+  Names: [String],
+  Image: String,
+  ImageID: String,
+  Command: String,
+  Created: String,
+  State: String,
+  Status: String,
+  Ports: [Port],
+  Labels: String,
+  SizeRw: Int,
+  SizeRootFs: Int,
+  HostConfig: HostConfig,
+  NetworkSettings: NetworkSettings,
+  Mounts: [Mount]
+},
+input CreateNewContainer{
+  requestedName: String!,
+  image: String!,
+  commands: [String]
+}
+input ContainerId{
+  id: String!
+}
+type Mutation{
+  createNewContainer(data: CreateNewContainer): String
+  stopRunningContainer(data: ContainerId!): String
+  startContainer(data: ContainerId!): String
+  removeContainer(data: ContainerId!): String
+}
+type Query{
+  allContainers: [Container]!
+  allRunningContainers: [Container]!
+}

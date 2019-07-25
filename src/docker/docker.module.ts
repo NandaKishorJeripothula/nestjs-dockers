@@ -1,9 +1,10 @@
 import { Module, HttpModule } from '@nestjs/common';
-import { DockerController } from './docker.controller';
 import { DockerService } from './docker.service';
+import { DockerController } from './docker.controller';
 @Module({
     imports:[HttpModule],
+    providers:[DockerService],
     controllers:[DockerController],
-    providers:[DockerService]
+    exports:[DockerService]
 })
 export class DockerModule {}
