@@ -1,7 +1,7 @@
 import { Injectable, HttpService } from '@nestjs/common';
 import { Args, Info } from '@nestjs/graphql';
 const address = "http://localhost:2375";
-const ver = ""; // currently its v1.40 May be this is needed in production level
+const ver = ""; // currently its v1.40 May be this is needed in production level add as /v1.40 
 const url = address + ver;
 
 import {Message,Container, ContainerDetails, NewContainer} from '../graphql.schema'
