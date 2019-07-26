@@ -24,19 +24,24 @@ export class ContainerResolver {
 
     @Query('getContainerAddress')
     async getContainerAddress(@Args() args, @Info() info): Promise<ContainerAddressMessage> {
-         let response:ContainerAddressMessage={status:0, message:'', url:''};
+         let response:ContainerAddressMessage={status:404, message:'Failed: Container May Not_Exist/Not_Runnig/Has_No_PubliC_Port', url:'null'};
         let allRuning = await this.allRunningContainers(args, info);
-        if (!Array.isArray(allRuning)) {
-            response.status=404;
-            response.message="Failed: Container May not exist/not running/ no public port available"
+        if (!allRuning.length) {
+            return response;
         }else{
             allRuning.forEach((container)=>{
                 if(container.Id===args.data.Id){
-                    response.status=200;
-                    response.message="Follow the url";
-                    container.Ports.forEach(port=>{
-                        response.url+=`http://localhost:${port.PublicPort} `
-                    })
+                    if(container.Ports.length>0){
+                        response.status=200;
+                        response.message="Follow the url";
+                        container.Ports.forEach(port=>{
+                            response.url+=`http://localhost:${port.PublicPort} `
+                        })
+                    }else{
+                        response.status=204;
+                        response.message="No Public Port Available";
+                        response.url="null"
+                    }
                 }
             })
 
