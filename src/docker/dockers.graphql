@@ -1,104 +1,305 @@
+scalar ArbitraryName
+
+interface Object{
+    String :String
+}
 type Port{
-  PrivatePort: Int,
-  PublicPort: Int,
-  Type: String
+    PrivatePort: Int,
+    PublicPort: Int,
+    Type: String
 }
 type HostConfig{
-  NetworkMode: String
+    NetworkMode: String
+}
+type InspectContainerMount {
+    Type: String,
+    Name: String,
+    Source: String,
+    Destination: String,
+    Driver: String,
+    Mode: String,
+    RW: Boolean,
+    Propagation: String
 }
 type Mount{
-  Name: String,
-  Sourc: String,
-  Destination: String,
-  Driver: String,
-  Mode: String,
-  RW: Boolean,
-  Propagation: String
+    Name: String,
+    Source: String,
+    Destination: String,
+    Driver: String,
+    Mode: String,
+    RW: Boolean,
+    Propagation: String
 }
 type Bridge{
-  NetworkID: String,
-  EndpointID: String,
-  Gateway: String,
-  IPAddress: String,
-  IPPrefixLen: Int,
-  IPv6Gateway: String,
-  GlobalIPv6Address: String,
-  GlobalIPv6PrefixLen: Int,
-  MacAddress: String
+    NetworkID: String,
+    EndpointID: String,
+    Gateway: String,
+    IPAddress: String,
+    IPPrefixLen: Int,
+    IPv6Gateway: String,
+    GlobalIPv6Address: String,
+    GlobalIPv6PrefixLen: Int,
+    MacAddress: String
 }
 type Networks{
-      bridge: Bridge
+    bridge: Bridge
 }
 type NetworkSettings{
-    Networks:Networks
+    Networks: Networks
 }
 type Labels{
-  _any: String
+    ArbitraryName: String
 }
-type Container
-{
-  Id: String!,
-  Names: [String],
-  Image: String,
-  ImageID: String,
-  Command: String,
-  Created: String,
-  State: String,
-  Status: String,
-  Ports: [Port],
-  Labels: Labels,
-  SizeRw: Int,
-  SizeRootFs: Int,
-  HostConfig: HostConfig,
-  NetworkSettings: NetworkSettings,
-  Mounts: [Mount]
+type Container {
+    Id: String!,
+    Names: [String],
+    Image: String,
+    ImageID: String,
+    Command: String,
+    Created: String,
+    State: String,
+    Status: String,
+    Ports: [Port],
+    Labels: Object,
+    SizeRw: Int,
+    SizeRootFs: Int,
+    HostConfig: HostConfig,
+    NetworkSettings: NetworkSettings,
+    Mounts: [Mount]
 },
 input CreateNewContainer{
-  requestedName: String!,
-  image: String!,
-  commands: [String]
+    requestedName: String! ,
+        image: String! ,
+            "The port that service running inside docker"
+    exposedPort: Int! ,
+        "Protocol if anty. Defualt will be TCP"
+    protocol: String,
+        commands: [String],
 }
 type NewContainer{
-  Id: String!,
-  Warnings: [String]
+    Id: String!,
+    Warnings: [String]
 }
 input ContainerId{
-  Id: String!
+    Id: String!
 }
 type Message{
-  message:String
+    message: String
+}
+type ContainerAddressMessage{
+    status:Int,
+    message:String,
+    url:String
 }
 type Mutation{
-  createNewContainer(data: CreateNewContainer!): NewContainer
-  startContainer(data: ContainerId!): Message
-  stopContainer(data: ContainerId!): Message
-  restartContainer(data:ContainerId!):Message
-  killContainer(data:ContainerId!):Message
-  removeContainer(data: ContainerId!): Message
-  
-}
-input Logs{
-  Container:ContainerId!
-  LogOptions:LogOptions!
-}
-""" LogOptions must have *** atleast one param among *stdout* and *stderr* be passed***"""
-input LogOptions{
-  "Return logs from stdout"
-  stdout:Boolean
-  "Return logs from stderr"
-  stderr:Boolean
-  "Only return logs since this time, as a UNIX timestamp"
-  since:Int
-  "Only return logs before this time, as a UNIX timestamp"
-  until:Int
-  "Add timestamps to every log line"
-  timestamps:Int
-  "Only return this Int of log lines from the end of the logs. Specify as an integer or all to output all log lines."
-  tail:Int
+    createNewContainer(data: CreateNewContainer!): NewContainer
+    startContainer(data: ContainerId!): Message
+    stopContainer(data: ContainerId!): Message
+    restartContainer(data: ContainerId!): Message
+    killContainer(data: ContainerId!): Message
+    removeContainer(data: ContainerId!): Message
+
 }
 
 type Query{
-  allContainers: [Container]!
-  allRunningContainers: [Container] 
-  getContainerLogs(data:Logs!):Message
+    allContainers: [Container]!
+    allRunningContainers: [Container]
+    getContainerLogs(data: Logs!): Message
+    inspectContainer(data: ContainerId!): ContainerDetails
+    getContainerAddress(data:ContainerId!):ContainerAddressMessage
+}
+input Logs{
+    Container: ContainerId!
+    LogOptions: LogOptions!
+}
+""" LogOptions must have *** atleast one param among *stdout* and *stderr* be passed***"""
+input LogOptions{
+    "Return logs from stdout"
+    stdout: Boolean
+    "Return logs from stderr"
+    stderr: Boolean
+    "Only return logs since this time, as a UNIX timestamp"
+    since: Int
+    "Only return logs before this time, as a UNIX timestamp"
+    until: Int
+    "Add timestamps to every log line"
+    timestamps: Int
+    "Only return this Int of log lines from the end of the logs. Specify as an integer or all to output all log lines."
+    tail: Int
+}
+
+
+type ContainerState{
+    Status: String,
+    Running: Boolean,
+    Paused: Boolean,
+    Restarting: Boolean,
+    OOMKilled: Boolean,
+    Dead: Boolean,
+    Pid: Int,
+    ExitCode: Int,
+    Error: String,
+    StartedAt: String,
+    FinishedAt: String
+}
+type LogConfig{ Type: String, Config: [String] }
+type PortBindings{
+    Object:Object
+}
+type RestartPolicy{
+    Name: String,
+    MaximumRetryCount: Int
+}
+type ContainerHostConfig {
+    Binds: String,
+    ContainerIDFile: String,
+    LogConfig: LogConfig,
+    NetworkMode: String,
+    PortBindings: PortBindings,
+    RestartPolicy: RestartPolicy,
+    AutoRemove: Boolean,
+    VolumeDriver: String,
+    VolumesFrom: String,
+    CapAdd: String,
+    CapDrop: String,
+    Dns: String,
+    DnsOptions: String,
+    DnsSearch: String,
+    ExtraHosts: String,
+    GroupAdd: String,
+    IpcMode: String,
+    Cgroup: String,
+    Links: String,
+    OomScoreAdj: Int,
+    PidMode: String,
+    Privileged: Boolean,
+    PublishAllPorts: Boolean,
+    ReadonlyRootfs: Boolean,
+    SecurityOpt: String,
+    UTSMode: String,
+    UsernsMode: String,
+    ShmSize: Int,
+    Runtime: String,
+    ConsoleSize: [Int],
+    Isolation: String,
+    CpuShares: Int,
+    Memory: Int,
+    NanoCpus: Int,
+    CgroupParent: String,
+    BlkioWeight: Int,
+    BlkioWeightDevice: String,
+    BlkioDeviceReadBps: String,
+    BlkioDeviceWriteBps: String,
+    BlkioDeviceReadIOps: String,
+    BlkioDeviceWriteIOps: String,
+    CpuPeriod: Int,
+    CpuQuota: Int,
+    CpuRealtimePeriod: Int,
+    CpuRealtimeRuntime: Int,
+    CpusetCpus: String,
+    CpusetMems: String,
+    Devices: String,
+    DeviceCgroupRules: String,
+    DiskQuota: Int,
+    KernelMemory: Int,
+    MemoryReservation: Int,
+    MemorySwap: Int,
+    MemorySwappiness: String,
+    OomKillDisable: Boolean,
+    PidsLimit: Int,
+    Ulimits: String,
+    CpuCount: Int,
+    CpuPercent: Int,
+    IOMaximumIOps: Int,
+    IOMaximumBandwidth: Int,
+    MaskedPaths: [
+        String
+    ],
+    ReadonlyPaths: [
+        String
+    ]
+}
+type GraphiDriverData{
+    LowerDir: String,
+    MergedDir: String,
+    UpperDir: String,
+    WorkDir: String
+}
+type GraphDriver{
+    Data: GraphiDriverData,
+    Name: String
+}
+
+type ArbitraryNameObject {
+    ArbitraryName: Object
+}
+type InspectContainerConfig{
+    Hostname: String,
+    Domainname: String,
+    User: String,
+    AttachStdin: Boolean,
+    AttachStdout: Boolean,
+    AttachStderr: Boolean,
+    ExposedPorts: ArbitraryNameObject,
+    Tty: Boolean,
+    OpenStdin: Boolean,
+    StdinOnce: Boolean,
+    Env: [String],
+    Cmd: String,
+    ArgsEscaped: Boolean,
+    Image: String,
+    Volumes: ArbitraryNameObject,
+    WorkingDir: String,
+    Entrypoint: [String],
+    OnBuild: String,
+    Labels: Object
+}
+type InspectContainerPorts{
+    ArbitraryName: [String]
+}
+type InspectContainerNetworks { bridge: [Object] }
+type InspectContainerNetworksettings{
+    Bridge: String,
+    SandboxID: String,
+    HairpinMode: Boolean,
+    LinkLocalIPv6Address: String,
+    LinkLocalIPv6PrefixLen: Int,
+    Ports: InspectContainerPorts,
+    SandboxKey: String,
+    SecondaryIPAddresses: String,
+    SecondaryIPv6Addresses: String,
+    EndpointID: String,
+    Gateway: String,
+    GlobalIPv6Address: String,
+    GlobalIPv6PrefixLen: Int,
+    IPAddress: String,
+    IPPrefixLen: Int,
+    IPv6Gateway: String,
+    MacAddress: String,
+    Networks: InspectContainerNetworks
+}
+type ContainerDetails{
+    Id: String,
+    Created: String,
+    Path: String,
+    Args: [String],
+    State: ContainerState,
+    Image: String,
+    ResolvConfPath: String,
+    HostnamePath: String,
+    HostsPath: String,
+    LogPath: String,
+    Name: String,
+    RestartCount: Int,
+    Driver: String,
+    Platform: String,
+    MountLabel: String,
+    ProcessLabel: String,
+    AppArmorProfile: String,
+    ExecIDs: String,
+    HostConfig: ContainerHostConfig,
+    GraphDriver: GraphDriver,
+    Mounts: [InspectContainerMount],
+    Config: InspectContainerConfig,
+    NetworkSettings: InspectContainerNetworksettings
 }

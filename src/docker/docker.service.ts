@@ -1,10 +1,10 @@
 import { Injectable, HttpService } from '@nestjs/common';
+import { Args, Info } from '@nestjs/graphql';
 
-import { Query, Resolver, Args, Info } from '@nestjs/graphql';
+const address = "http://localhost:2375";
+const ver = ""; // currently its v1.40 May be this is needed in production level
+const url = address + ver;
 
-const address= "http://localhost:2375";
-const ver=""; // currently its v1.40 May be this is needed in production level
-const url=address+ver;
 @Injectable()
 export class DockerService {
     constructor(private readonly httpService: HttpService) { }
@@ -85,11 +85,23 @@ export class DockerService {
             .catch(error => Error(error));
     }
     async createNewContainer(@Args() args, @Info() info): Promise<any> {
+        let exposedPort = args.data.exposedPort + "/";
+        //If no Protocol is defined default will be tcp
+        exposedPort += args.data.protocol ? args.data.protocol : 'tcp';
         return await this.httpService.post(
             `${url}/containers/create?name=${args.data.requestedName}`,
             {
+                //This is for dynamic binding with the host using TCP
+                ExposedPorts: { [exposedPort]: {} },
+                /**
+                 *  Input HostPort if a specific port is desired
+                 *  For best-practice, let the system decide the port since the desired may not be available 
+                 */
+                HostConfig: {
+                    PortBindings: { [exposedPort]: [{ HostPort: "" }] }
+                },
                 Image: args.data.image,
-                Cmd: args.commands ? args.commands : []
+                Cmd: args.data.commands ? args.data.commands : []
             }
         )
             .toPromise()
@@ -131,13 +143,13 @@ export class DockerService {
             .then(res => res.status === 204 ? { message: "Container Removed" } : res.data)
             .catch(error => error.response.status === 400 ? { message: "Bad Parameter" }
                 : error.response.status === 404 ? { message: "No Such Container" }
-                    : error.response.status === 409 ? { message: "Conflict Raised While Removing\n "+error.response.data.message }
+                    : error.response.status === 409 ? { message: "Conflict Raised While Removing\n " + error.response.data.message }
                         : Error(error));
     }
     async getContainerLogs(@Args() args, @Info() info): Promise<any> {
-        let queryParams='';
+        let queryParams = '';
         for (let [key, value] of Object.entries(args.data.LogOptions)) {
-            queryParams+=(`?${key}=${value}`)
+            queryParams += (`?${key}=${value}`)
         }
         return await this.httpService.get(`${url}/containers/${args.data.Container.Id}/logs${queryParams}`)
             .toPromise()
@@ -145,7 +157,11 @@ export class DockerService {
                 : res.status === 200 ? { message: `Logs\n:${res.data}` } : res.data)
             .catch(error => error.response.status === 404 ? { message: "No Such Container" } : Error(error));
     }
-
-
+    async inspectContainer(@Args() args, @Info() info): Promise<any> {
+        return await this.httpService.get(`${url}/containers/${args.data.Id}/json`)
+            .toPromise()
+            .then(res => res.data)
+            .catch(error => error.response.status === 404 ? { message: "No Such Container" } : Error(error));
+    }
 
 }
