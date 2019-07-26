@@ -1,8 +1,7 @@
 import { Query, Resolver, Args, Info, Mutation } from '@nestjs/graphql';
 import { DockerService } from '../docker/docker.service';
-import { Container,ContainerAddressMessage } from '../graphql.schema';
+import { Container, ContainerAddressMessage, Message, ContainerDetails, NewContainer } from '../graphql.schema';
 @Resolver('Container')
-
 export class ContainerResolver {
     constructor(private readonly dockerService: DockerService) { }
     @Query('allContainers')
@@ -14,33 +13,33 @@ export class ContainerResolver {
         return await this.dockerService.allRunningContainers(args, info);
     }
     @Query('getContainerLogs')
-    async getContainerLogs(@Args() args, @Info() info): Promise<Container[]> {
+    async getContainerLogs(@Args() args, @Info() info): Promise<Message> {
         return await this.dockerService.getContainerLogs(args, info);
     }
     @Query('inspectContainer')
-    async inspectContainer(@Args() args, @Info() info): Promise<any> {
+    async inspectContainer(@Args() args, @Info() info): Promise<ContainerDetails> {
         return await this.dockerService.inspectContainer(args, info);
     }
 
     @Query('getContainerAddress')
     async getContainerAddress(@Args() args, @Info() info): Promise<ContainerAddressMessage> {
-         let response:ContainerAddressMessage={status:404, message:'Failed: Container May Not_Exist/Not_Runnig/Has_No_PubliC_Port', url:'null'};
+        let response: ContainerAddressMessage = { status: 404, message: 'Failed: Container May Not_Exist/Not_Runnig/Has_No_PubliC_Port', url: "" };
         let allRuning = await this.allRunningContainers(args, info);
         if (!allRuning.length) {
             return response;
-        }else{
-            allRuning.forEach((container)=>{
-                if(container.Id===args.data.Id){
-                    if(container.Ports.length>0){
-                        response.status=200;
-                        response.message="Follow the url";
-                        container.Ports.forEach(port=>{
-                            response.url+=`http://localhost:${port.PublicPort} `
+        } else {
+            allRuning.forEach((container) => {
+                if (container.Id === args.data.Id) {
+                    if (container.Ports.length > 0) {
+                        response.status = 200;
+                        response.message = "Follow the url";
+                        container.Ports.forEach(port => {
+                            response.url += `http://localhost:${port.PublicPort} `
                         })
-                    }else{
-                        response.status=204;
-                        response.message="No Public Port Available";
-                        response.url="null"
+                    } else {
+                        response.status = 204;
+                        response.message = "No Public Port Available";
+                        response.url = "null"
                     }
                 }
             })
@@ -50,27 +49,27 @@ export class ContainerResolver {
 
     }
     @Mutation('createNewContainer')
-    async createNewContainer(@Args() args, @Info() info) {
+    async createNewContainer(@Args() args, @Info() info): Promise<NewContainer> {
         return await this.dockerService.createNewContainer(args, info);
     }
     @Mutation('startContainer')
-    async startContainer(@Args() args, @Info() info) {
+    async startContainer(@Args() args, @Info() info): Promise<Message> {
         return await this.dockerService.startContainer(args, info);
     }
     @Mutation('stopContainer')
-    async stopContainer(@Args() args, @Info() info) {
+    async stopContainer(@Args() args, @Info() info): Promise<Message> {
         return await this.dockerService.stopContainer(args, info);
     }
     @Mutation('restartContainer')
-    async restartContainer(@Args() args, @Info() info) {
+    async restartContainer(@Args() args, @Info() info): Promise<Message> {
         return await this.dockerService.restartContainer(args, info);
     }
     @Mutation('killContainer')
-    async killContainer(@Args() args, @Info() info) {
+    async killContainer(@Args() args, @Info() info): Promise<Message> {
         return await this.dockerService.killContainer(args, info);
     }
     @Mutation('removeContainer')
-    async removeContainer(@Args() args, @Info() info) {
+    async removeContainer(@Args() args, @Info() info): Promise<Message> {
         return await this.dockerService.removeContainer(args, info);
     }
 
