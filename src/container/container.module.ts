@@ -3,7 +3,7 @@ import { ContainerResolver } from './container.resolver';
 import { DockerModule } from '../docker/docker.module';
 
 @Module({
-  imports :[DockerModule],
-  providers: [ContainerResolver]
+  imports: [DockerModule],
+  providers: [ContainerResolver],
 })
 export class ContainerModule {}
